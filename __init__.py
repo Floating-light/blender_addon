@@ -553,7 +553,7 @@ class UE4_PivotPainterProperties(PropertyGroup):															# create property
 	folderpath : StringProperty( name = "Save location", description="Choose a directory:", default='', maxlen=1024, subtype='DIR_PATH')
 	createnew : BoolProperty( name = "Always create new textures", default = True, description = ("Should it create a new texture or use the first one?"))
 
-	percentageObjectToKeep : bpy.props.FloatProperty(name = "Percentage to keep", description="随机移除对象中, 要保留的对象数量的百分比",default=0.8, min=0.0, max=1.0)
+	percentageObjectToKeep : bpy.props.FloatProperty(name = "Percentage to keep", description="随机移除对象中, 要保留的对象数量的百分比,如果这个值>1, 那它就是要保留的三角面的大致数量",default=0.8, min=0.0)
 
 def main(context):																							# The start of all the problems
 	print('===================')

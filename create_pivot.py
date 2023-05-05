@@ -36,12 +36,24 @@ def draw_curve(start:Vector, end:Vector):
     return obj
 def random_remove_selected_object(keep_percentage:float) -> int:
     '''
+        if keep_percentage > 1, keep_percentage is the number of trisangles to keep 
+
         return the num of objects removed
     '''
     selected_objects = bpy.context.selected_objects
     random.shuffle(selected_objects)
-    num_to_delete = int(len(selected_objects) *(1-keep_percentage))
-    deleted_list = selected_objects[0:num_to_delete]
+    if keep_percentage > 1:
+        tris_num_need_delete = sum((len(obj.data.polygons) for obj in selected_objects),0.0) - keep_percentage
+        num_to_delete = 0
+        tris_num_to_deleted = 0
+        while num_to_delete <= len(selected_objects) and tris_num_to_deleted < tris_num_need_delete:
+            tris_num_to_deleted += len(selected_objects[num_to_delete].data.polygons)
+            num_to_delete+=1
+
+
+    else: 
+        num_to_delete = int(len(selected_objects) *(1-keep_percentage))
+    deleted_list = selected_objects[0:int(num_to_delete)]
     # bpy.ops.object.delete({"selected_objects": objs})
     bpy.ops.object.delete({"selected_objects": deleted_list})
     return num_to_delete
@@ -79,6 +91,8 @@ def find_object_axis(obj:bpy.types.Object, pivotPosition: Vector) -> Matrix:
     rot = Matrix([-Rv,-Uv,Nv])
 
     #  @ obj.matrix_world.to_3x3().normalized().to_4x4() 
+    # 先旋转后平移
+    # 要将轴移到pivotPosition，则需要pivotPosition位于Local空间的原点
     final = rot.to_4x4() @ obj.matrix_world.to_3x3().normalized().to_4x4() @ Matrix.Translation(- pivotPosition) 
     # @ rot.to_4x4()
     return final
