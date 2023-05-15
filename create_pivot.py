@@ -130,6 +130,24 @@ def find_pivot(obj:bpy.types.Object) -> Vector:
             min_z = val.z
             min_idx = idx
     return  coords[min_idx]
+def find_pivot_average_bottom(obj:bpy.types.Object, delta_z:float) -> Vector:
+    verts:List[bpy.types.MeshVertex] = obj.data.vertices
+    
+    # local space 
+    verts_sorted = sorted(verts, key=lambda x:(obj.matrix_world@x.co).z, reverse=False)
+    out_pivot:Vector = ((0,0,0))
+    min_z:float = 0.0
+    for idx, val in enumerate(verts_sorted):
+        if idx == 0 :
+            out_pivot = val.co
+            min_z = (obj.matrix_world @ val.co).z
+        else:
+            if abs((obj.matrix_world @ val.co).z - min_z) <= delta_z:
+                out_pivot = (out_pivot + val.co) / 2.0
+            else:
+                break
+    return  out_pivot
+
 def main():
     selected_objects = bpy.context.selected_objects
 
@@ -161,11 +179,15 @@ def main():
         obj.matrix_world.translation = coords[min_idx]
         
     print("-----------End script ")
-def main2():
+def main2(deltaZ:float):
     selected_objects = bpy.context.selected_objects
     for ind, obj in enumerate(selected_objects):
         print("Process ", ind)
-        pivot = find_pivot(obj)
+        pivot:Vector = ((0.0,0.0,0.0))
+        if deltaZ > 0:
+            pivot = find_pivot_average_bottom(obj, deltaZ)
+        else:
+            pivot = find_pivot(obj)
         pivot_world = obj.matrix_world @ pivot
 
         axis = find_object_axis(obj, pivot)
@@ -186,7 +208,8 @@ class OUTPOST_CreatePivot(bpy.types.Operator):
         return context.mode == 'OBJECT'
     def execute(self, context):
         print("execute my create pivot method ")
-        main2()
+        pp = bpy.context.scene.pivot_painter
+        main2(pp.pivotCalculateDeltaZ)
         return {'FINISHED'}
 # main()
 # TEST_find_object_axis(bpy.context.object)

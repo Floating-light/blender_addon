@@ -554,6 +554,7 @@ class UE4_PivotPainterProperties(PropertyGroup):															# create property
 	createnew : BoolProperty( name = "Always create new textures", default = True, description = ("Should it create a new texture or use the first one?"))
 
 	percentageObjectToKeep : bpy.props.FloatProperty(name = "Percentage to keep", description="随机移除对象中, 要保留的对象数量的百分比,如果这个值>1, 那它就是要保留的三角面的大致数量",default=0.8, min=0.0)
+	pivotCalculateDeltaZ : bpy.props.FloatProperty(name = "pivot calculate delta Z", description="计算Pivot位置时,从底部的顶点取平均位置为Pivot,需要考虑的顶点之间Z的最大差值.",default=1, min=0.0)
 
 def main(context):																							# The start of all the problems
 	print('===================')
@@ -767,6 +768,8 @@ class PPB_PT_panel:																			# THe panel in the UI
 
 		mycol.prop(pp, "percentageObjectToKeep")
 		mycol.operator("ue4_tools.random_remove_object")
+		mycol.prop(pp, "pivotCalculateDeltaZ")
+
 		mycol.separator()
 
 		col = self.layout.column()
